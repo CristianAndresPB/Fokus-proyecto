@@ -6,10 +6,17 @@ const banner = document.querySelector('.app__image')
 const titulo = document.querySelector('.app__title')
 const botones = document.querySelectorAll('.app__card-button')
 const inputEnfoqueMusica = document.querySelector('#alternar-musica')
-const musica = new Audio('./sonidos/luna-rise-part-one.mp3')
-const botonIniciarPausar = document.querySelector("#start-pause")
+const botonIniciarPausar = document.querySelector('#start-pause')
+const textoIniciarPausar = document.querySelector('#start-pause span')
+const iconoIniciarPausar = document.querySelector('.app__card-primary-button-icon')
+const tiempoEnPantalla = document.querySelector('#timer')
 
-let tiempoTranscurridoEnSegundos = 5
+const musica = new Audio('./sonidos/luna-rise-part-one.mp3')
+const audioPlay = new Audio('./sonidos/play.wav');
+const audioPausa = new Audio('./sonidos/pause.mp3');
+const audioTiempoFinalizado = new Audio('./sonidos/beep.mp3');
+
+let tiempoTranscurridoEnSegundos = 1500
 let idIntervalo = null
 
 musica.loop = true // sirve para escuchar la musica por el tiempo que uno desee
@@ -25,6 +32,7 @@ inputEnfoqueMusica.addEventListener('change', ()=> {
 })
 
 botonCorto.addEventListener('click', () => {
+    tiempoTranscurridoEnSegundos = 1500
     cambiarContexto ('descanso-corto') 
     botonCorto.classList.add('active')
     //html.setAttribute('data-contexto', 'descanso-corto')
@@ -32,6 +40,7 @@ botonCorto.addEventListener('click', () => {
 })
 
 botonEnfoque.addEventListener('click', () => {
+    tiempoTranscurridoEnSegundos = 300
     cambiarContexto ('enfoque')
     botonEnfoque.classList.add('active')
     //html.setAttribute('data-contexto', 'enfoque' )
@@ -39,6 +48,7 @@ botonEnfoque.addEventListener('click', () => {
 })
 
 botonLargo.addEventListener('click', () => {
+    tiempoTranscurridoEnSegundos = 900
     cambiarContexto ('descanso-largo')
     botonLargo.classList.add('active')
     //html.setAttribute('data-contexto', 'descanso-largo' )
@@ -47,11 +57,10 @@ botonLargo.addEventListener('click', () => {
 
 function cambiarContexto(contexto){
 
-    botones.forEach(function(contexto){
-        contexto.classList.remove('active')
-    })
-
-
+    mostrarTiempo()
+    botones.forEach(function(botonContexto){
+        botonContextoontexto.classList.remove('active')
+    });
     html.setAttribute('data-contexto',contexto)
     banner.setAttribute('src', `./imagenes/${contexto}.png`)
 
@@ -83,25 +92,41 @@ function cambiarContexto(contexto){
 
 const cuentaRegresiva = () => {
     if(tiempoTranscurridoEnSegundos <= 0){
-        reiniciar()
+        audioTiempoFinalizado.play();
         alert('Tiempo final')
+        reiniciar()
         return  //interrumpir el flujo de la aplicación
     }
+
     tiempoTranscurridoEnSegundos -= 1
-    console.log("Temporizador:" + tiempoTranscurridoEnSegundos)
+    mostrarTiempo()
 }
 
 botonIniciarPausar.addEventListener('click', iniciarPausar)
 
 function iniciarPausar(){
     if(idIntervalo){
+        audioPausa.play();
         reiniciar()
         return
     }
+    audioPlay.play();
     idIntervalo = setInterval(cuentaRegresiva,1000)
+    textoIniciarPausar.textContent = "Pausar"
+    iconoIniciarPausar.setAttribute('src', `/imagenes/pause.png`)
 }
 
 function reiniciar(){
     clearInterval(idIntervalo)
+    textoIniciarPausar.textContent = "Comenzar"
+    iconoIniciarPausar.setAttribute('src', `/imagenes/play_arrow.png`)
     idIntervalo = null
 }
+
+function mostrarTiempo(){
+    const tiempo = new Date(tiempoTranscurridoEnSegundos * 1000 )
+    const tiempoFormateado = tiempo.toLocaleTimeString('es-MX', {minute: '2-digit', second: '2-digit'}) 
+    tiempoEnPantalla.innerHTML = `${tiempoFormateado}`
+}
+
+mostrarTiempo()
